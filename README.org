@@ -14,17 +14,23 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
 
 + create a new non-root user using =adduser <NAME>=
 + update the system using =apt-get update -y && apt-get upgrade -y=
-+ install essential tools using =apt-get install sudo vim apache2 portsentry fail2ban mailutils -y=
++ install essential tools using =apt-get install -y sudo vim apache2 portsentry ufw fail2ban mailutils=
   + sudo :: execute commands as =root=
   + vim :: the perfect text editor for servers, since their non GUI systems, mostly
-  + fail2ban :: monitor server logs and detects any IP with a suspesious activity, after predefined nuber of failure, it blocks the IP for a specific duration [fn:1]
-  + portsentry :: port scaning utility, good for scanng port and avoid attacks [fn:2]
+  + fail2ban :: monitor server logs and detects any IP with a suspesious activity, after predefined number of failure, it blocks the IP for a specific duration [fn:1]
+  + portsentry :: port scanning utility, good for scanning port and avoiding attacks [fn:2]
   + apache2 :: the fucking HTTP server itself [fn:3]
+  + mailutils :: the swiss army knife of electronic mail handling [fn:4]
+  + ufw :: uncomplicated firewall [fn:5]
 
 * Footnotes
 
+[fn:5] this seems like a good [[https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server][documentation]]
+
+[fn:4] good luck reading any GNU [[https://mailutils.org/manual/mailutils.html][documentation]]
+
 [fn:3] [[https://www.hostinger.com/tutorials/what-is-apache][good article]] comparison between many web servers including NGINX and TOMCAT
 
-[fn:1] here's a [[https://www.linode.com/docs/security/using-fail2ban-for-security/][good place]] to document about fail2ban for serve, and [[https://www.digitalocean.com/community/tutorials/how-to-protect-ssh-with-fail2ban-on-ubuntu-14-04][this]] one is to secure SSH
-
 [fn:2] this [[https://wiki.debian-fr.xyz/Portsentry][debian blog]] has a some good documentation. also [[https://www.symantec.com/connect/articles/portsentry-attack-detection-part-one][here]]!
+
+[fn:1] here's a [[https://www.linode.com/docs/security/using-fail2ban-for-security/][good place]] to document about fail2ban for serve, and [[https://www.digitalocean.com/community/tutorials/how-to-protect-ssh-with-fail2ban-on-ubuntu-14-04][this]] one is to secure SSH
