@@ -23,6 +23,14 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
   + mailutils :: the swiss army knife of electronic mail handling [fn:4]
   + ufw :: uncomplicated firewall [fn:5]
 
+** Configure Sudo
+
+Using =vim= as =root=, add the /user's previlege specification/ the file =/etc/sudoers=. Right at the comment =# User privilege specification= add =<LOGIN>    ALL=(ALL:ALL) NOPASSWD:ALL=
+
+** Configure static IP
+
+
+
 * Footnotes
 
 [fn:5] this seems like a good [[https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server][documentation]]
