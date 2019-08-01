@@ -1,0 +1,21 @@
+* About
+
+this holds inportant information about networing and seciruty terms for this project!
+
+* Static IP Adress
+
+A static Internet Protocol (IP) address (static IP address) is a permanent number assigned to a computer by an Internet service provider (ISP).
+
+This means that a computer with an assigned static IP address uses the same IP address when connecting to the Internet.
+
+An explanation of a static IP address and when you would want to use one. A static IP address is an IP address that was manually configured for a device, versus one that was assigned via a DHCP server.
+
+When a device is assigned a static IP address, the address does not change. Most devices use dynamic IP addresses, which are assigned by the network when they connect and change over time.
+
+Thus, When you want to have a Web Server, you need a /static/ address so that browsers would now which address to query
+
+* Netmask
+
+A Netmask is a 32-bit "mask" used to divide an IP address into subnets and specify the network's available hosts. In a netmask, two bits are always automatically assigned. For example, in 255.255.225.0, "0" is the assigned network address. In 255.255.255.255, "255" is the assigned broadcast address.
+
+The subnet mask is the classical way of representing which bits are part of the network portion of the address vs. the host bits of the address. The subnet mask for a /24 network is 255.255.255.0 or frequently in hex 0XFFFFFF00

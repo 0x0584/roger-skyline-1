@@ -14,14 +14,14 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
 
 + create a new non-root user using =adduser <NAME>=
 + update the system using =apt-get update -y && apt-get upgrade -y=
-+ install essential tools using =apt-get install -y sudo vim apache2 portsentry ufw fail2ban mailutils=
++ install essential tools using =apt-get install -y sudo vim apache2 portsentry ufw fail2ban mailutils net-tools=
   + sudo :: execute commands as =root=
   + vim :: the perfect text editor for servers, since their non GUI systems, mostly
-  + fail2ban :: monitor server logs and detects any IP with a suspesious activity, after predefined number of failure, it blocks the IP for a specific duration [fn:1]
-  + portsentry :: port scanning utility, good for scanning port and avoiding attacks [fn:2]
-  + apache2 :: the fucking HTTP server itself [fn:3]
-  + mailutils :: the swiss army knife of electronic mail handling [fn:4]
-  + ufw :: uncomplicated firewall [fn:5]
+  + fail2ban :: monitor server logs and detects any IP with a suspesious activity, after predefined number of failure, it blocks the IP for a specific duration[fn:1]
+  + portsentry :: port scanning utility, good for scanning port and avoiding attacks[fn:2]
+  + apache2 :: the fucking HTTP server itself[fn:3]
+  + mailutils :: the swiss army knife of electronic mail handling[fn:4]
+  + ufw :: uncomplicated firewall[fn:5]
 
 ** Configure Sudo
 
@@ -29,9 +29,28 @@ Using =vim= as =root=, add the /user's previlege specification/ the file =/etc/s
 
 ** Configure static IP
 
+#+BEGIN_QUOTE
+/Must change the network adapter from NAT to Bridged Adapter in the VM's settings/
+#+END_QUOTE
 
+We need to setup the /primary network/, thus we need to edit =/etc/network/interfaces=. We find that the primary network (for my VM at least) is =enp0s3=, found under the line =#The primary network interface=.
+
+To configure a static IP we need to create the file[fn:6] =/etc/network/interfaces.d/enp0s3=.
+
+#+BEGIN_SRC
+iface enp0s3 inet static
+        address 10.11.200.247
+        netmask 255.255.255.252
+        gateway 10.11.254.254
+#+END_SRC
+
+Finally, we restart the network using =sudo service networking restart= and check that using =ip addr= and look for =enp0s3=
+
+** Configure SSH
 
 * Footnotes
+
+[fn:6] it's possible to change it at place but it's not recommended. this is a [[https://linuxconfig.org/how-to-setup-a-static-ip-address-on-debian-linux][good article]]
 
 [fn:5] this seems like a good [[https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server][documentation]]
 
