@@ -19,3 +19,11 @@ Thus, When you want to have a Web Server, you need a /static/ address so that br
 A Netmask is a 32-bit "mask" used to divide an IP address into subnets and specify the network's available hosts. In a netmask, two bits are always automatically assigned. For example, in 255.255.225.0, "0" is the assigned network address. In 255.255.255.255, "255" is the assigned broadcast address.
 
 The subnet mask is the classical way of representing which bits are part of the network portion of the address vs. the host bits of the address. The subnet mask for a /24 network is 255.255.255.0 or frequently in hex 0XFFFFFF00
+
+* SSH - Secure Shell
+
+SSH, also known as Secure Shell or Secure Socket Shell, is a network protocol that gives users, particularly system administrators, a secure way to access a computer over an unsecured network. SSH also refers to the suite of utilities that implement the SSH protocol.
+
+SSH is typically used to log into a remote machine and execute commands, but it also supports tunneling, forwarding TCP ports and X11 connections; it can transfer files using the associated SSH file transfer (SFTP) or secure copy (SCP) protocols. SSH uses the client-server model.
+
+SSH public-key authentication relies on asymmetric cryptographic algorithms that generate a pair of separate keys (a key pair), one "private" and the other "public". You keep the private key a secret and store it on the computer you use to connect to the remote system.

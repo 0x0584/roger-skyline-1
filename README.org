@@ -74,7 +74,23 @@ Though nothing is stopping you from using reserved port numbers, our suggestion 
 
 However, I have chosen =1412= since it's my nickname anyway, =0x0584=
 
-*** Setup public keys
+*** Setup acces with public keys
+
+#+BEGIN_QUOTE
+_NOTE:_
+
+The process of creating publib/private key pair is *done on the Mac OS X machine*. Where we're going to send the public key to teh server to know who were are when interacting.
+#+END_QUOTE
+
+To generate a public/private (RSA) key pair we need to execute =ssh-keygen -t rsa= where =-t rsa= specifies the type of encryptation to /RSA -- Rivest–Shamir–Adleman Encryptaion Algorithm/. Two files will be generated, =id_rsa= and =id_rsa.pub=, which are /private/ and /public/ key respectively.
+
+Next step is to copy the =id_rsa.pub= to the server using =ssh-copy-id= (WHAT! THEY HAVE COMMAND FOR THAT TOO!) as =ssh-copy-id -i id_rsa.pub <USER>@<IP> -p <PORT>=. In my case, USER is =archid-= IP is =10.11.200.247= and PORT is =1412=.
+
+#+BEGIN_QUOTE
+This result the addition of the key to the server's =~/.ssh/authorized_keys=
+#+END_QUOTE>
+
+
 
 ** TODO Configure Firewall
 
