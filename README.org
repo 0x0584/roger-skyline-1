@@ -25,11 +25,16 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
   + mailutils :: the swiss army knife of electronic mail handling[fn:4]
   + ufw :: uncomplicated firewall[fn:5]
 
-** Configure Sudo
+** DONE Configure Sudo
 
+- State "DONE"       from              [2019-08-02 Fri 19:43]
 Using =vim= as =root=, add the /user's previlege specification/ the file =/etc/sudoers=. Right at the comment =# User privilege specification= add =<LOGIN>    ALL=(ALL:ALL) NOPASSWD:ALL=
 
-** Configure static IP
+** PENDING Configure static IP
+
+- State "PENDING"    from              [2019-08-02 Fri 19:43]
+
+*NEED TO CHECK THIS AT SCHOOL!*
 
 #+BEGIN_QUOTE
 /Must change the network adapter from NAT to Bridged Adapter in the VM's settings/
@@ -48,15 +53,14 @@ iface enp0s3 inet static
 
 Finally, we restart the network using =sudo service networking restart= and check that using =ip addr= and look for =enp0s3=
 
-** IN-PROGRESS Configure SSH
+** DONE Configure SSH
 
-- State "IN-PROGRESS" from              [2019-08-01 Thu 14:19]
+- State "DONE"       from "IN-PROGRESS" [2019-08-02 Fri 19:42]
+- State "IN-PROGRESS"                   [2019-08-01 Thu 14:19]
 
-#+BEGIN_QUOTE
-/Some info about ssh in general/
-#+END_QUOTE
+*** DONE Configure default port
 
-*** Configure default port
+- State "DONE"                        [2019-08-02 Fri 19:42]
 
 SSH could be configured by editing the default port (22) in the file =/etc/ssh/sshd_config=, The port should not be chosen arbitrary (or it might be so. but, it *must not be already used* as it would create conflicts). We can check that using =sudo lsof -i -P -n | grep LISTEN | grep <PORT>=.
 
@@ -74,7 +78,9 @@ Though nothing is stopping you from using reserved port numbers, our suggestion 
 
 I have chosen =2222= as an SSH port
 
-*** Setup access with public keys
+*** DONE Setup access with public keys
+
+- State "DONE"                         [2019-08-02 Fri 19:41]
 
 #+BEGIN_QUOTE
 _NOTE:_
@@ -90,10 +96,53 @@ Next step is to copy the =id_rsa.pub= to the server using =ssh-copy-id= (WHAT! T
 
 This result the addition of the key to the server's =~/.ssh/authorized_keys=
 
-Now, we need to remove root login permit, and password authentification by editing =/etc/ssh/sshd.config=
+Now, we need to remove root login permit, and password authentification by editing =/etc/ssh/sshd_config= which is done by uncommenting lines =32= and =56= respectively.
 
+Finally, restarting SSH daemon service using =sudo service ssh restart=.
 
-** TODO Configure Firewall
+** IN-PROGRESS Configure Firewall
+
+- State "IN-PROGRESS" from "TODO"       [2019-08-02 Fri 19:44]
+
+*** Configuring UFW
+
+Enable UFW is it wasn't, using =sudo ufw status= and =sudo ufw enable=. Next is configuring the firewall rules for SSH, HTTP and HTTPS.
+
+#+BEGIN_SRC
+sudo ufw allow 50683/tcp            # SSH
+sudo ufw allow 80/tcp               # HTTP
+sudo ufw allow 443                  # HTTPS
+#+END_SRC
+
+*** Configuring fail2ban
+
+We need to edit DOS -- Denail Of Servce with fail2ban, which is done by editing =/etc/fail2ban/jail.conf=. A basic settings would be like this:
+
++ For SSH
+
+  #+BEGIN_QUOTE
+  [sshd]
+  enabled = true
+  port  = 42
+  logpath = %(sshd_log)s
+  backend = %(sshd_backend)s
+  maxretry = 3
+  bantime = 600
+  #+END_QUOTE
+
++ For HTTP/HTTPS
+
+  #+BEGIN_QUOTE
+  [http-get-dos]
+  enabled = true
+  port = http,https
+  filter = http-get-dos
+  logpath = /var/log/apache2/access.log
+  maxretry = 300
+  findtime = 300
+  bantime = 600
+  action = iptables[name=HTTP, port=http, protocol=tcp]
+  #+END_QUOTE
 
 ** TODO Configure ports
 
