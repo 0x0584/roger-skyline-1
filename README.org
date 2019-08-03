@@ -100,49 +100,59 @@ Now, we need to remove root login permit, and password authentification by editi
 
 Finally, restarting SSH daemon service using =sudo service ssh restart=.
 
-** IN-PROGRESS Configure Firewall
+** DONE Configure Firewall and Banlist
 
+- State "DONE"       from "IN-PROGRESS" [2019-08-03 Sat 02:11]
 - State "IN-PROGRESS" from "TODO"       [2019-08-02 Fri 19:44]
 
 *** Configuring UFW
 
 Enable UFW is it wasn't, using =sudo ufw status= and =sudo ufw enable=. Next is configuring the firewall rules for SSH, HTTP and HTTPS.
 
-#+BEGIN_SRC
+#+BEGIN_SRC conf
 sudo ufw allow 50683/tcp            # SSH
 sudo ufw allow 80/tcp               # HTTP
 sudo ufw allow 443                  # HTTPS
 #+END_SRC
 
+Also to allow =ping= we need to editing =/etc/ufw/before.rules=
+
+#+BEGIN_SRC conf
+# Allow ping
+-A ufw-before-output -p icmp --icmp-type echo-request -j ACCEPT
+#+END_SRC
+
+Finally, as always, restart UFW using =sudo ufw reload=
+
 *** Configuring fail2ban
 
 We need to edit DOS -- Denail Of Servce with fail2ban, which is done by editing =/etc/fail2ban/jail.conf=. A basic settings would be like this:
 
-+ For SSH
+/For SSH/
 
-  #+BEGIN_QUOTE
-  [sshd]
-  enabled = true
-  port  = 42
-  logpath = %(sshd_log)s
-  backend = %(sshd_backend)s
-  maxretry = 3
-  bantime = 600
-  #+END_QUOTE
+#+BEGIN_SRC conf
+[sshd]
+enabled = true
+port  = 42
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+maxretry = 3
+bantime = 600
+#+END_SRC
 
-+ For HTTP/HTTPS
+/For HTTP/HTTPS/
 
-  #+BEGIN_QUOTE
-  [http-get-dos]
-  enabled = true
-  port = http,https
-  filter = http-get-dos
-  logpath = /var/log/apache2/access.log
-  maxretry = 300
-  findtime = 300
-  bantime = 600
-  action = iptables[name=HTTP, port=http, protocol=tcp]
-  #+END_QUOTE
+#+BEGIN_SRC conf
+[http-get-dos]
+enabled = true
+port = http,https
+filter = http-get-dos
+logpath = /var/log/apache2/access.log
+maxretry = 300
+findtime = 300
+bantime = 600
+action = iptables[name=HTTP, port=http, protocol=tcp]
+#+END_SRC
 
 ** TODO Configure ports
 
