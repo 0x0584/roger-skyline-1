@@ -4,20 +4,66 @@ This is a guide to do all the things described in Roger Skyline 1. This might no
 
 * A Debian VM
 
-For the moment, All of this is done on a =24-inch iMac (Late 2006)= running a Max OS X =Lion 10.7.5= using a =Debian 9.9= in =VirtualBox 4.3=
+Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.0.0-amd64-netinst.iso][Debian 10.0 Net Install]] for latest packages + minimum download/install time. Also [[https://download.virtualbox.org/virtualbox/6.0.10/VirtualBox-6.0.10-132072-OSX.dmg][VirtualBox 6.0]]. Important thing is to allocate exactly =8 GB= with no partitioning!
 
-Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.0.0-amd64-netinst.iso][Debian 10.10 Net Install]] for latest packages + minimum download/install time. Also [[https://download.virtualbox.org/virtualbox/6.0.10/VirtualBox-6.0.10-132072-OSX.dmg][VirtualBox 6.0]]. Important thing is to allocate exactly =8 GB= with no partitioning!
+* TODO Disk partitioning
+
+- Look for Gibi Byte and GB byte. which are just powers of two vs powers of ten.
 
 * IN-PROGRESS Network and Security
 
 - State "IN-PROGRESS"                  [2019-08-01 Thu 14:23]
 
-** Initial Configuration
+** IN-PROGRESS Initial Configuration
 
-+ create a new non-root user using =adduser <NAME>=
-+ update the system using =apt-get update -y && apt-get upgrade -y=
-+ install essential tools using =apt-get install -y sudo vim apache2 portsentry ufw fail2ban mailutils net-tools=
-  + sudo :: execute commands as =root=
+- State "IN-PROGRESS" from "TODO"       [2019-08-08 Thu 21:57]
+
+Update the system using =apt-get update -y && apt-get upgrade -y= to ensure that the latest version is available. Install essential tools using
+
+#+BEGIN_SRC shell
+apt-get install -y sudo vim apache2 portsentry ufw \
+                    fail2ban mailutils dnsutils \
+                    net-tools gpg openssh
+#+END_SRC
+
+*** DONE User configuration
+
+- State "DONE"       from "TODO"       [2019-08-08 Thu 21:46]
+
+We can create a new non-root user using =/usr/sbin/adduser -m <NAME>=[fn:7]. The flag =-d <PATH>= is used to set a specific user path. 
+
+,----
+| This is a [[https://www.techrepublic.com/article/how-to-create-users-and-groups-in-linux-from-the-command-line/][nice source]].
+`----
+
+*** DONE Sudo -- execute commands as root 
+
+- State "DONE"       from "TODO"       [2019-08-08 Thu 21:59]
+
+sudo, execute commands as =root=. But not without configuration for users first. To do that, using =vim= as =root=, we add the /user's previlege specification/ the file =/etc/sudoers=. 
+
+#+BEGIN_SRC conf
+# User privilege specification
+add =<LOGIN>    ALL=(ALL:ALL) NOPASSWD:ALL
+#+END_SRC
+
+
+*** TODO Configure a static IP
+
+#+BEGIN_QUOTE
+/One things which is required here and could not be done internally, is to change the NAT to Bridge[fn:8]
+#+END_QUOTE
+
+The first place check is the primary network. we need to setup the networking interface. This is done by editing =/etc/network/interfaces=. The primary network on my VM shows
+
+#+BEGIN_SRC conf
+#The primary network interface
+allow-hotplug enp0s3
+iface enp0s3 inet dhcp
+#+END_SRC 
+
+*** TODO 
+
   + vim :: the perfect text editor for servers, since their non GUI systems, mostly
   + fail2ban :: monitor server logs and detects any IP with a suspesious activity, after predefined number of failure, it blocks the IP for a specific duration[fn:1]
   + portsentry :: port scanning utility, good for scanning port and avoiding attacks[fn:2]
@@ -25,16 +71,12 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
   + mailutils :: the swiss army knife of electronic mail handling[fn:4]
   + ufw :: uncomplicated firewall[fn:5]
 
-** DONE Configure Sudo
-
-- State "DONE"       from              [2019-08-02 Fri 19:43]
-Using =vim= as =root=, add the /user's previlege specification/ the file =/etc/sudoers=. Right at the comment =# User privilege specification= add =<LOGIN>    ALL=(ALL:ALL) NOPASSWD:ALL=
 
 ** PENDING Configure static IP
 
 - State "PENDING"    from              [2019-08-02 Fri 19:43]
 
-*NEED TO CHECK THIS AT SCHOOL!*
+# *NEED TO CHECK THIS AT SCHOOL!*
 
 #+BEGIN_QUOTE
 /Must change the network adapter from NAT to Bridged Adapter in the VM's settings/
@@ -163,6 +205,10 @@ action = iptables[name=HTTP, port=http, protocol=tcp]
 - State "PENDING"                     [2019-08-01 Thu 14:23]
 
 * Footnotes
+
+[fn:8] I can't tell whic this but yeah
+
+[fn:7] Since if we didn't, there would be no home directory.
 
 [fn:6] it's possible to change it at place but it's not recommended. this is a [[https://linuxconfig.org/how-to-setup-a-static-ip-address-on-debian-linux][good article]]
 
