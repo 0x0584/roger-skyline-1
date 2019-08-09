@@ -192,14 +192,76 @@ sender = root@debian
 
 Finally, restaring the service using =service fail2ban restart=
 
-** TODO Configure ports
+** IN-PROGRESS Configure ports
 
-** TODO Manage Services and Packages
+- State "IN-PROGRESS" from "TODO"       [2019-08-09 Fri 11:11]
 
+First thing to do, is ot switch into /auto/ mode for TCP and UDP. By editing the file =/etc/default/portsentry= as follows:
+
+#+BEGIN_SRC conf
+TCP_MODE="atcp"
+UDP_MODE="audp"
+#+END_SRC
+
+Next, edit portsentry.conf to configure blocking and killing route. Comment the current =KILL_ROUTE= and replace it with the following 
+
+#+BEGIN_SRC conf
+KILL_ROUTE="/sbin/iptables -I INPUT -s $TAGETS -j DROP"
+# Comment KILL_HOSTS_DENY
+KILL_HOSTS_DENY="ALL: $TARGET$ : DENY
+#+END_SRC
+
+** IN-PROGRESS Manage Services and Packages
+
+- State "IN-PROGRESS" from "TODO"       [2019-08-09 Fri 11:33]
+
+*** DONE Disabling unwanted services
+
+- State "DONE"       from "TODO"       [2019-08-09 Fri 11:52]
+Services that we don't need are apt-dialy and apt-upgrade and keyboard/console setup nor the syslog
+
+#+BEGIN_SRC bash
+systemctl disable console-setup.service
+systemctl disable keyboard-setup.service
+systemctl disable apt-daily.timer
+systemctl disable apt-daily-upgrade.timer 
+systemctl disable syslog.service
+#+END_SRC
+
+*** DONE Scheduling an update
+
+- State "DONE"       from "TODO"       [2019-08-09 Fri 11:52]
+Next, create a the repo =~/.scripts= and write in the file =update.sh= as following
+
+#+BEGIN_SRC bash
+#!/bin/bash
+
+LOGFILE=/var/log/update_script.log
+sudo apt-get update -y >> $LOGFILE
+sudo apt-get upgrade -y >> $LOGFILE
+#+END_SRC
+
+Next, we need to add the task to cron by executing =crontab -e= (as root)
+
+#+BEGIN_SRC shell
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+@reboot sudo ~/.scripts/update.sh
+0 4 * * 6 sudo ~/scirpts/update.sh  # WTF IS THIS SYNTAX
+#+END_SRC
+
+*** TODO Monitor crontab file
+
+# idea is to create a md5 somewhere, and keep comparing it each time. Then if we find something bad, we send and email.
+ 
 * PENDING Web Deployment
 
 - State "PENDING"                     [2019-08-01 Thu 14:23]
 
+
+** Deploying a webpage
+** SSL Certificates
 * Footnotes
 
 [fn:8] I can't tell whic this but yeah
