@@ -14,8 +14,9 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
 
 - State "IN-PROGRESS"                  [2019-08-01 Thu 14:23]
 
-** IN-PROGRESS Initial Configuration
+** DONE Initial Configuration
 
+- State "DONE"       from "IN-PROGRESS" [2019-08-09 Fri 10:23]
 - State "IN-PROGRESS" from "TODO"       [2019-08-08 Thu 21:57]
 
 Update the system using =apt-get update -y && apt-get upgrade -y= to ensure that the latest version is available. Install essential tools using
@@ -30,25 +31,23 @@ apt-get install -y sudo vim apache2 portsentry ufw \
 
 - State "DONE"       from "TODO"       [2019-08-08 Thu 21:46]
 
-We can create a new non-root user using =/usr/sbin/adduser -m <NAME>=[fn:7]. The flag =-d <PATH>= is used to set a specific user path. 
+We can create a new non-root user using =/usr/sbin/adduser -m <USER>=[fn:7]. The flag =-d <PATH>= is used to set a specific user path. 
 
 ,----
 | This is a [[https://www.techrepublic.com/article/how-to-create-users-and-groups-in-linux-from-the-command-line/][nice source]].
 `----
 
-*** DONE Sudo -- execute commands as root 
-
-- State "DONE"       from "TODO"       [2019-08-08 Thu 21:59]
-
-sudo, execute commands as =root=. But not without configuration for users first. To do that, using =vim= as =root=, we add the /user's previlege specification/ the file =/etc/sudoers=. 
+Add =<USER>= to sudoers using =vim= as =root=, we update the /user's previlege specification/ in =/etc/sudoers=. 
 
 #+BEGIN_SRC conf
 # User privilege specification
-add =<LOGIN>    ALL=(ALL:ALL) NOPASSWD:ALL
+<USER>    ALL=(ALL:ALL) NOPASSWD:ALL
 #+END_SRC
 
+*** DONE Configure a static IP
 
-*** TODO Configure a static IP
+- State "DONE"       from "IN-PROGRESS" [2019-08-09 Fri 10:07]
+- State "IN-PROGRESS" from "TODO"       [2019-08-08 Thu 08:20]
 
 #+BEGIN_QUOTE
 /One things which is required here and could not be done internally, is to change the NAT to Bridge[fn:8]
@@ -62,38 +61,17 @@ allow-hotplug enp0s3
 iface enp0s3 inet dhcp
 #+END_SRC 
 
-*** TODO 
+Remove the two lines under the comment, And replace them with =auto enps03= and we need to create a new network interface =/etc/interfaces.d/enp0s3= 
 
-  + vim :: the perfect text editor for servers, since their non GUI systems, mostly
-  + fail2ban :: monitor server logs and detects any IP with a suspesious activity, after predefined number of failure, it blocks the IP for a specific duration[fn:1]
-  + portsentry :: port scanning utility, good for scanning port and avoiding attacks[fn:2]
-  + apache2 :: the fucking HTTP server itself[fn:3]
-  + mailutils :: the swiss army knife of electronic mail handling[fn:4]
-  + ufw :: uncomplicated firewall[fn:5]
-
-
-** PENDING Configure static IP
-
-- State "PENDING"    from              [2019-08-02 Fri 19:43]
-
-# *NEED TO CHECK THIS AT SCHOOL!*
-
-#+BEGIN_QUOTE
-/Must change the network adapter from NAT to Bridged Adapter in the VM's settings/
-#+END_QUOTE
-
-We need to setup the /primary network/, thus we need to edit =/etc/network/interfaces=. We find that the primary network (for my VM at least) is =enp0s3=, found under the line =#The primary network interface=.
-
-To configure a static IP we need to create the file[fn:6] =/etc/network/interfaces.d/enp0s3=.
-
-#+BEGIN_SRC
+#+BEGIN_SRC conf
+# configuration of enp0s3 network interface
 iface enp0s3 inet static
-        address 10.11.200.247
-        netmask 255.255.255.252
-        gateway 10.11.254.254
+    address 10.11.200.247
+    netmask 200.255.255.252
+    gatewaye 10.11.254.254
 #+END_SRC
 
-Finally, we restart the network using =sudo service networking restart= and check that using =ip addr= and look for =enp0s3=
+Finally, we restart the network using =service networking restart= and check that using =ip addr= and look for =enp0s3=
 
 ** DONE Configure SSH
 
@@ -104,9 +82,9 @@ Finally, we restart the network using =sudo service networking restart= and chec
 
 - State "DONE"                        [2019-08-02 Fri 19:42]
 
-SSH could be configured by editing the default port (22) in the file =/etc/ssh/sshd_config=, The port should not be chosen arbitrary (or it might be so. but, it *must not be already used* as it would create conflicts). We can check that using =sudo lsof -i -P -n | grep LISTEN | grep <PORT>=.
+SSH could be configured by editing the default port (22) in the file =/etc/ssh/sshd_config=, The port should not be chosen arbitrary (or it might be so. but, it *must not be already used* as it would create conflicts). We can check that using =lsof -i -P -n | grep LISTEN | grep <PORT>=.
 
-However, IANA -- The Internet Assigned Numbers Authority (IANA) is responsible for the global coordination of the DNS Root, IP addressing, and other Internet protocol resources. their port assignment guidelines said the following:
+However, IANA -- /The Internet Assigned Numbers Authority/ is responsible for the global coordination of the DNS Root, IP addressing, and other Internet protocol resources. their port assignment guidelines said the following
 
 #+BEGIN_QUOTE
 /Port numbers are divided into three ranges: Well Known Ports, Registered Ports, and Dynamic and/or Private Ports./
@@ -118,7 +96,7 @@ However, IANA -- The Internet Assigned Numbers Authority (IANA) is responsible f
 Though nothing is stopping you from using reserved port numbers, our suggestion may help avoid technical issues with port allocation in the future.
 #+END_QUOTE
 
-I have chosen =2222= as an SSH port
+I have chosen =63845= as a SSH port
 
 *** DONE Setup access with public keys
 
@@ -127,34 +105,34 @@ I have chosen =2222= as an SSH port
 #+BEGIN_QUOTE
 _NOTE:_
 
-The process of creating publib/private key pair is *done on the Mac OS X machine*. Where we're going to send the public key to the server to know who were are when interacting.
+The process of creating public/private key pair is *done on the Mac OS X machine*. Where we're going to send the public key to the server to know our identity when interacting without a need of a password.
 
-the command =ssh-copy-id= might not be available on Mac OS X by default, install it via =brew install ssh-copy-id openssh=
+The command =ssh-copy-id= might not be available on Mac OS X by default, install it via =brew install ssh-copy-id=
 #+END_QUOTE
 
 To generate a public/private (RSA) key pair we need to execute =ssh-keygen -t rsa= where =-t rsa= specifies the type of encryptation to /RSA -- Rivest–Shamir–Adleman Encryptaion Algorithm/. Two files will be generated, =id_rsa= and =id_rsa.pub=, which are /private/ and /public/ key respectively.
 
-Next step is to copy the =id_rsa.pub= to the server using =ssh-copy-id= (WHAT! THEY HAVE COMMAND FOR THAT TOO!) as =ssh-copy-id -i id_rsa.pub <USER>@<IP> -p <PORT>=. In my case, USER is =archid-= IP is =10.11.200.247= and PORT is =2222=.
+Next step is to copy the =id_rsa.pub= to the server using =ssh-copy-id= (WHAT! THEY HAVE COMMAND FOR THAT TOO!) as =ssh-copy-id -i id_rsa.pub <USER>@<IP> -p <PORT>=. This result the addition of the key to the server's =~/.ssh/authorized_keys=
 
-This result the addition of the key to the server's =~/.ssh/authorized_keys=
+Now, we need to remove root /login permit/, /public key authuntification/ and /password authentification/ by editing =/etc/ssh/sshd_config= which is done by uncommenting lines =32=, =37= and =56= respectively.
 
-Now, we need to remove root login permit, and password authentification by editing =/etc/ssh/sshd_config= which is done by uncommenting lines =32= and =56= respectively.
-
-Finally, restarting SSH daemon service using =sudo service ssh restart=.
+Finally, restarting SSH daemon service using =service ssh restart=.
 
 ** DONE Configure Firewall and Banlist
 
 - State "DONE"       from "IN-PROGRESS" [2019-08-03 Sat 02:11]
 - State "IN-PROGRESS" from "TODO"       [2019-08-02 Fri 19:44]
 
-*** Configuring UFW
+*** DONE Configuring UFW
 
-Enable UFW is it wasn't, using =sudo ufw status= and =sudo ufw enable=. Next is configuring the firewall rules for SSH, HTTP and HTTPS.
+- State "DONE"       from "TODO"       [2019-08-09 Fri 10:32]
+
+Enable UFW is it wasn't, using =ufw status= and =ufw enable=. Next is configuring the firewall rules for SSH, HTTP and HTTPS.
 
 #+BEGIN_SRC conf
-sudo ufw allow 50683/tcp            # SSH
-sudo ufw allow 80/tcp               # HTTP
-sudo ufw allow 443                  # HTTPS
+ufw allow 63845/tcp            # SSH
+ufw allow 80/tcp               # HTTP
+ufw allow 443                  # HTTPS
 #+END_SRC
 
 Also to allow =ping= we need to editing =/etc/ufw/before.rules=
@@ -164,25 +142,33 @@ Also to allow =ping= we need to editing =/etc/ufw/before.rules=
 -A ufw-before-output -p icmp --icmp-type echo-request -j ACCEPT
 #+END_SRC
 
-Finally, as always, restart UFW using =sudo ufw reload=
+Finally, as always, restart UFW using =ufw reload=
 
-*** Configuring fail2ban
+*** DONE Configuring fail2ban
 
-We need to edit DOS -- Denail Of Servce with fail2ban, which is done by editing =/etc/fail2ban/jail.conf=. A basic settings would be like this:
+- State "DONE"       from "TODO"       [2019-08-09 Fri 11:06]
+We need to protect the server against DOS -- /Denail Of Service/ with fail2ban, which is done by editing =/etc/fail2ban/jail.conf=. A basic settings would be like this:
 
-/For SSH/
+/For SSH/ it's quiet simple, just add the port.
 
 #+BEGIN_SRC conf
 [sshd]
 enabled = true
-port  = 42
+port  = 63845
 logpath = %(sshd_log)s
 backend = %(sshd_backend)s
 maxretry = 3
 bantime = 600
 #+END_SRC
 
-/For HTTP/HTTPS/
+/For HTTP/HTTPS/  Fisrt we need to create a filter =http-get-dos= inside repo =/etc/fail2ban/filter.d=
+
+#+BEGIN_SRC conf
+failregex = ^<HOST> - .*"(GET|POST).*
+ignoreregex = 
+#+END_SRC
+
+Then configure =/etc/fail2ban/jail.conf=
 
 #+BEGIN_SRC conf
 [http-get-dos]
@@ -195,6 +181,16 @@ findtime = 300
 bantime = 600
 action = iptables[name=HTTP, port=http, protocol=tcp]
 #+END_SRC
+
+Also we have to set the default email for reports. Creating the =jail.local= at =/etc/fail2ban/= as follows
+
+#+BEGIN_SRC conf
+[DEFAULT]
+destemail = archid-@student.1337.ma
+sender = root@debian
+#+END_SRC
+
+Finally, restaring the service using =service fail2ban restart=
 
 ** TODO Configure ports
 
