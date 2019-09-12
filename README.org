@@ -156,53 +156,13 @@ It contains configuration to block anything but SSH HTTP/HTTPS. Rejecting Smurf 
 *** DONE Configuring fail2ban
 
 - State "DONE"       from "TODO"       [2019-08-09 Fri 11:06]
-We need to protect the server against DOS -- /Denail Of Service/ with fail2ban, which is done by editing =/etc/fail2ban/jail.conf=. A basic settings would be like this:
-
-/For SSH/ it's quiet simple, just add the port.
-
-#+BEGIN_SRC conf
-[sshd]
-enabled = true
-port  = 63845
-logpath = %(sshd_log)s
-backend = %(sshd_backend)s
-maxretry = 3
-bantime = 600
-#+END_SRC
-
-/For HTTP/HTTPS/  Fisrt we need to create a filter =http-get-dos= inside repo =/etc/fail2ban/filter.d=
-
-#+BEGIN_SRC conf
-failregex = ^<HOST> - .*"(GET|POST).*
-ignoreregex =
-#+END_SRC
-
-Then configure =/etc/fail2ban/jail.conf=
-
-#+BEGIN_SRC conf
-[http-get-dos]
-enabled = true
-port = http,https
-filter = http-get-dos
-logpath = /var/log/apache2/access.log
-maxretry = 300
-findtime = 300
-bantime = 600
-action = iptables[name=HTTP, port=http, protocol=tcp]
-#+END_SRC
-
-Also we have to set the default email for reports. Creating the =jail.local= at =/etc/fail2ban/= as follows
-
-#+BEGIN_SRC conf
-[DEFAULT]
-destemail = archid-@student.1337.ma
-sender = root@debian
-#+END_SRC
+We need to protect the server against DOS -- /Denail Of Service/ with fail2ban, +which is done by editing /etc/fail2ban/jail.conf+ we need to edit =jail.local=. A basic settings is in the file [[file:jail.local][jail.local]]
 
 Finally, restaring the service using =service fail2ban restart=
 
-** IN-PROGRESS Configure ports
+** DONE Configure ports
 
+- State "DONE"       from "IN-PROGRESS" [2019-09-12 Thu 15:22]
 - State "IN-PROGRESS" from "TODO"       [2019-08-09 Fri 11:11]
 
 First thing to do, is ot switch into /auto/ mode for TCP and UDP. By editing the file =/etc/default/portsentry= as follows:
