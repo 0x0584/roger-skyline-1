@@ -6,9 +6,14 @@ This is a guide to do all the things described in Roger Skyline 1. This might no
 
 Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.0.0-amd64-netinst.iso][Debian 10.0 Net Install]] for latest packages + minimum download/install time. Also [[https://download.virtualbox.org/virtualbox/6.0.10/VirtualBox-6.0.10-132072-OSX.dmg][VirtualBox 6.0]]. Important thing is to allocate exactly =8 GB= with no partitioning!
 
-* TODO Disk partitioning
+* DONE Disk partitioning
 
-- Look for Gibi Byte and GB byte. which are just powers of two vs powers of ten.
+- State "DONE"       from "TODO"       [2019-09-11 Wed 19:31]
+ Choose manual disk, and create three primary partitions:
+
++ the =/= partition, has 4.5 GB, ext4
++ the =/swap= haS 1GB ext4
++ the =/home= has the rest
 
 * IN-PROGRESS Network and Security
 
@@ -22,22 +27,18 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
 Update the system using =apt-get update -y && apt-get upgrade -y= to ensure that the latest version is available. Install essential tools using
 
 #+BEGIN_SRC shell
-apt-get install -y sudo vim apache2 portsentry ufw \
-                    fail2ban mailutils dnsutils \
-                    net-tools gpg openssh
+apt-get install -y sudo vim git apache2 portsentry \
+                    iptables-presistent fail2ban \
+                    mailutils dnsutils net-tools
 #+END_SRC
 
 *** DONE User configuration
 
 - State "DONE"       from "TODO"       [2019-08-08 Thu 21:46]
 
-We can create a new non-root user using =/usr/sbin/adduser -m <USER>=[fn:7]. The flag =-d <PATH>= is used to set a specific user path. 
++We can create a new non-root user using =/usr/sbin/adduser -m <USER>=[fn:7]. The flag =-d <PATH>= is used to set a specific user path.+
 
-,----
-| This is a [[https://www.techrepublic.com/article/how-to-create-users-and-groups-in-linux-from-the-command-line/][nice source]].
-`----
-
-Add =<USER>= to sudoers using =vim= as =root=, we update the /user's previlege specification/ in =/etc/sudoers=. 
+We create a new user using =useradd <USER>= instead of =/usr/sbin/adduser=. Also we need to add =<USER>= to sudoers. Either using =usermod -a -G sudo <USER>= to add =<USER>= to /sudo/ group. Or manually by updating the /user's previlege specification/ in =/etc/sudoers=
 
 #+BEGIN_SRC conf
 # User privilege specification
@@ -59,16 +60,16 @@ The first place check is the primary network. we need to setup the networking in
 #The primary network interface
 allow-hotplug enp0s3
 iface enp0s3 inet dhcp
-#+END_SRC 
+#+END_SRC
 
-Remove the two lines under the comment, And replace them with =auto enps03= and we need to create a new network interface =/etc/interfaces.d/enp0s3= 
+Remove the two lines under the comment, And replace them with =auto enps03= and we need to create a new network interface =/etc/interfaces.d/enp0s3=
 
 #+BEGIN_SRC conf
 # configuration of enp0s3 network interface
 iface enp0s3 inet static
     address 10.11.200.247
     netmask 200.255.255.252
-    gatewaye 10.11.254.254
+    gateway 10.11.254.254
 #+END_SRC
 
 Finally, we restart the network using =service networking restart= and check that using =ip addr= and look for =enp0s3=
@@ -84,19 +85,19 @@ Finally, we restart the network using =service networking restart= and check tha
 
 SSH could be configured by editing the default port (22) in the file =/etc/ssh/sshd_config=, The port should not be chosen arbitrary (or it might be so. but, it *must not be already used* as it would create conflicts). We can check that using =lsof -i -P -n | grep LISTEN | grep <PORT>=.
 
-However, IANA -- /The Internet Assigned Numbers Authority/ is responsible for the global coordination of the DNS Root, IP addressing, and other Internet protocol resources. their port assignment guidelines said the following
+However, IANA -- /The Internet Assigned Numbers Authority/ is responsible for the global coordination of the DNS Root, IP addressing, and other Internet protocol resources. Their port assignment guidelines said the following:
 
 #+BEGIN_QUOTE
-/Port numbers are divided into three ranges: Well Known Ports, Registered Ports, and Dynamic and/or Private Ports./
+/Port numbers are divided into three ranges: Well Known Ports, Registered Ports, and Dynamic and/or Private Ports/.
 
-- The Well Known Ports are those from =0= through =1023= and SHOULD NOT be used.
-- Registered Ports are those from =1024= through =49151= should also be avoided too.
-- Dynamic and/or Private Ports are those from 49152 through 65535 and can be used.
+    - The Well Known Ports are those from =0= through =1023= and SHOULD NOT be used.
+    - Registered Ports are those from =1024= through =49151= should also be avoided too.
+    - Dynamic and/or Private Ports are those from =49152= through =65535= and can be used.
 
-Though nothing is stopping you from using reserved port numbers, our suggestion may help avoid technical issues with port allocation in the future.
+Though nothing is stopping you from using reserved port numbers, but it's better to avoid technical issues with port allocation in the future.
 #+END_QUOTE
 
-I have chosen =63845= as a SSH port
+I have chosen =63845= as a SSH port, after that we need to modify the port in =/etc/ssh/sshd_config/=. Then, restart sshd daemon
 
 *** DONE Setup access with public keys
 
@@ -105,7 +106,7 @@ I have chosen =63845= as a SSH port
 #+BEGIN_QUOTE
 _NOTE:_
 
-The process of creating public/private key pair is *done on the Mac OS X machine*. Where we're going to send the public key to the server to know our identity when interacting without a need of a password.
+The process of creating public/private key pair is *done on the Host machine*. Where we're going to send the public key to the server to know our identity when interacting without a need of a password.
 
 The command =ssh-copy-id= might not be available on Mac OS X by default, install it via =brew install ssh-copy-id=
 #+END_QUOTE
@@ -144,6 +145,45 @@ Also to allow =ping= we need to editing =/etc/ufw/before.rules=
 
 Finally, as always, restart UFW using =ufw reload=
 
+*** DONE Configuring iptables
+
+- State "DONE"       from "TODO"       [2019-09-11 Wed 23:47]
+#+BEGIN_SRC shell
+  #!/bin/sh
+
+  # flush everything
+
+  iptables -F
+
+  # block everything
+
+  iptables -P INPUT DROP
+  iptables -P FORWARD DROP
+  iptables -P OUTPUT DROP
+
+  # allow established
+
+  iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+  iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+  # allow loopback (localhost)
+
+  iptables -A INPUT -i lo -j ACCEPT
+  iptables -A OUTPUT -o lo -j ACCEPT
+
+  # allow ssh
+
+  iptables -A INPUT -p tcp --dport 63845 -j ACCEPT
+
+  # allow http/https
+
+  iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+  iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+
+  iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+  iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+#+END_SRC
+
 *** DONE Configuring fail2ban
 
 - State "DONE"       from "TODO"       [2019-08-09 Fri 11:06]
@@ -165,7 +205,7 @@ bantime = 600
 
 #+BEGIN_SRC conf
 failregex = ^<HOST> - .*"(GET|POST).*
-ignoreregex = 
+ignoreregex =
 #+END_SRC
 
 Then configure =/etc/fail2ban/jail.conf=
@@ -203,7 +243,7 @@ TCP_MODE="atcp"
 UDP_MODE="audp"
 #+END_SRC
 
-Next, edit portsentry.conf to configure blocking and killing route. Comment the current =KILL_ROUTE= and replace it with the following 
+Next, edit portsentry.conf to configure blocking and killing route. Comment the current =KILL_ROUTE= and replace it with the following
 
 #+BEGIN_SRC conf
 KILL_ROUTE="/sbin/iptables -I INPUT -s $TAGETS -j DROP"
@@ -224,7 +264,7 @@ Services that we don't need are apt-dialy and apt-upgrade and keyboard/console s
 systemctl disable console-setup.service
 systemctl disable keyboard-setup.service
 systemctl disable apt-daily.timer
-systemctl disable apt-daily-upgrade.timer 
+systemctl disable apt-daily-upgrade.timer
 systemctl disable syslog.service
 #+END_SRC
 
@@ -254,14 +294,15 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 *** TODO Monitor crontab file
 
 # idea is to create a md5 somewhere, and keep comparing it each time. Then if we find something bad, we send and email.
- 
+
 * PENDING Web Deployment
 
 - State "PENDING"                     [2019-08-01 Thu 14:23]
 
-
 ** Deploying a webpage
+
 ** SSL Certificates
+
 * Footnotes
 
 [fn:8] I can't tell whic this but yeah
