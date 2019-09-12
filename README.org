@@ -124,27 +124,6 @@ Finally, restarting SSH daemon service using =service ssh restart=.
 - State "DONE"       from "IN-PROGRESS" [2019-08-03 Sat 02:11]
 - State "IN-PROGRESS" from "TODO"       [2019-08-02 Fri 19:44]
 
-*** DONE Configuring UFW
-
-- State "DONE"       from "TODO"       [2019-08-09 Fri 10:32]
-
-Enable UFW is it wasn't, using =ufw status= and =ufw enable=. Next is configuring the firewall rules for SSH, HTTP and HTTPS.
-
-#+BEGIN_SRC conf
-ufw allow 63845/tcp            # SSH
-ufw allow 80/tcp               # HTTP
-ufw allow 443                  # HTTPS
-#+END_SRC
-
-Also to allow =ping= we need to editing =/etc/ufw/before.rules=
-
-#+BEGIN_SRC conf
-# Allow ping
--A ufw-before-output -p icmp --icmp-type echo-request -j ACCEPT
-#+END_SRC
-
-Finally, as always, restart UFW using =ufw reload=
-
 *** DONE Configuring iptables
 
 - State "DONE"       from "TODO"       [2019-09-11 Wed 23:47]
@@ -152,6 +131,8 @@ Finally, as always, restart UFW using =ufw reload=
 To configure a firewall using iptables, we need to add the [[file:fw][fw]] to =/etc/network/if-pre-up.d/= so that the firewall loads up at every boot.
 
 It contains configuration to block anything but SSH HTTP/HTTPS. Rejecting Smurf attack, blocking the attacking IP addresses for a day, limiting the number of connections per minute to reduce bruteforce changes.
+
+Also, we need to allow DNS queries for things like =ping= and =apt-get=
 
 *** DONE Configuring fail2ban
 
