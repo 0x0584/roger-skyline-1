@@ -148,41 +148,10 @@ Finally, as always, restart UFW using =ufw reload=
 *** DONE Configuring iptables
 
 - State "DONE"       from "TODO"       [2019-09-11 Wed 23:47]
-#+BEGIN_SRC shell
-  #!/bin/sh
 
-  # flush everything
+To configure a firewall using iptables, we need to add the [[file:fw][fw]] to =/etc/network/if-pre-up.d/= so that the firewall loads up at every boot.
 
-  iptables -F
-
-  # block everything
-
-  iptables -P INPUT DROP
-  iptables -P FORWARD DROP
-  iptables -P OUTPUT DROP
-
-  # allow established
-
-  iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-  iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-  # allow loopback (localhost)
-
-  iptables -A INPUT -i lo -j ACCEPT
-  iptables -A OUTPUT -o lo -j ACCEPT
-
-  # allow ssh
-
-  iptables -A INPUT -p tcp --dport 63845 -j ACCEPT
-
-  # allow http/https
-
-  iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-  iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
-
-  iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-  iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
-#+END_SRC
+It contains configuration to block anything but SSH HTTP/HTTPS. Rejecting Smurf attack, blocking the attacking IP addresses for a day, limiting the number of connections per minute to reduce bruteforce changes.
 
 *** DONE Configuring fail2ban
 

@@ -1,0 +1,83 @@
+#!/bin/sh
+
+# flush everything
+
+iptables -F
+
+# drop policy
+
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+# drop all invalid packets
+
+iptables -A INPUT       -m state --state INVALID -j DROP
+iptables -A OUTPUT      -m state --state INVALID -j DROP
+iptables -A FORWARD     -m state --state INVALID -j DROP
+
+# allow established
+
+iptables -A INPUT       -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT      -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# allow loopback (localhost)
+
+iptables -A INPUT       -i lo -j ACCEPT
+iptables -A OUTPUT      -o lo -j ACCEPT
+
+# allow ping
+
+iptables -t filter -A INPUT     -p icmp -j ACCEPT
+iptables -t filter -A OUTPUT    -p icmp -j ACCEPT
+
+# allow ssh
+
+iptables -A INPUT       -p tcp --dport 63845 -j ACCEPT
+iptables -I INPUT       -p tcp --dport 63845 -i enp0s3 -m state --state new -m recent --set
+iptables -I INPUT       -p tcp --dport 63845 -i enp0s3 -m state --state new -m recent --update --seconds 60 --hitcount 3 -j DROP
+
+# allow http/https
+
+iptables -A INPUT       -p tcp --dport 80 -j ACCEPT
+iptables -A OUTPUT      -p tcp --dport 80 -j ACCEPT
+iptables -I INPUT       -p tcp --dport 80 -i enp0s3 -m state --state new -m recent --set
+iptables -I INPUT       -p tcp --dport 80 -i enp0s3 -m state --state new -m recent --update --seconds 60 --hitcount 3 -j DROP
+
+iptables -A INPUT       -p tcp --dport 443 -j ACCEPT
+iptables -A OUTPUT      -p tcp --dport 443 -j ACCEPT
+iptables -I INPUT       -p tcp --dport 443 -i enp0s3 -m state --state new -m recent --set
+iptables -I INPUT       -p tcp --dport 443 -i enp0s3 -m state --state new -m recent --update --seconds 60 --hitcount 3 -j DROP
+
+# allow smtp
+
+iptables -t filter -A INPUT     -p tcp --dport 25 -j ACCEPT
+iptables -t filter -A OUTPUT    -p tcp --dport 25 -j ACCEPT
+
+# stop smurf attack
+
+iptables -A INPUT -p icmp -m icmp --icmp-type address-mask-request      -j DROP
+iptables -A INPUT -p icmp -m icmp --icmp-type timestamp-request         -j DROP
+
+# excessive TCP RST to avoid smurf
+
+iptables -A INPUT -p tcp -m tcp --tcp-flags RST RST -m limit --limit 2/second --limit-burst 2 -j ACCEPT
+
+# block for 24 hrs
+
+iptables -A FORWARD     -m recent --name portscan --rcheck --seconds 86400 -j DROP
+iptables -A FORWARD     -m recent --name portscan --remove
+
+iptables -A INPUT       -m recent --name portscan --rcheck --seconds 86400 -j DROP
+iptables -A INPUT       -m recent --name portscan --remove
+
+# defense against portscan
+
+iptables -A INPUT -p tcp -m state --state NEW -m recent --set
+iptables -A INPUT -p tcp -m state --state NEW -m recent --update --seconds 1 --hitcount 10 -j DROP
+
+# reject everything else
+
+iptables -A INPUT -j REJECT
+
+exit 0
