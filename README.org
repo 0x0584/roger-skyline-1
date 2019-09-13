@@ -181,29 +181,20 @@ systemctl disable syslog.service
 *** DONE Scheduling an update
 
 - State "DONE"       from "TODO"       [2019-08-09 Fri 11:52]
-Next, create a the repo =~/.scripts= and write in the file =update.sh= as following
-
-#+BEGIN_SRC bash
-#!/bin/bash
-
-LOGFILE=/var/log/update_script.log
-sudo apt-get update -y >> $LOGFILE
-sudo apt-get upgrade -y >> $LOGFILE
-#+END_SRC
-
-Next, we need to add the task to cron by executing =crontab -e= (as root)
+Next, create a the repo =/var/scripts= and write in the file =update.sh=. Then, we need to add the task to cron by executing =crontab -e= (as root)
 
 #+BEGIN_SRC shell
-SHELL=/bin/bash
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-
-@reboot sudo ~/.scripts/update.sh
-0 4 * * 6 sudo ~/scirpts/update.sh  # WTF IS THIS SYNTAX
+@reboot /var/scripts/update.sh
+0 4 * * 6 /var/scirpts/update.sh  # WTF IS THIS SYNTAX
 #+END_SRC
 
-*** TODO Monitor crontab file
+*** DONE Monitor crontab file
 
+- State "DONE"       from "IN-PROGRESS" [2019-09-13 Fri 01:44]
+- State "IN-PROGRESS" from "TODO"       [2019-09-13 Fri 01:43]
 # idea is to create a md5 somewhere, and keep comparing it each time. Then if we find something bad, we send and email.
+
+create a template mail file =/var/mail/change= and add =watch.sh= to =/var/scripts/=. Also we need to create a checksum of crontab and save it at =/var/log/shasum/=
 
 * PENDING Web Deployment
 
