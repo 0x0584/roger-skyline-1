@@ -38,12 +38,14 @@ apt-get install -y sudo vim git gpg2 \
 
 - State "DONE"       from "TODO"       [2019-08-08 Thu 21:46]
 
-We create a new user using =useradd <USER>= instead of =/usr/sbin/adduser=. Also we need to add =<USER>= to sudoers. Either using =usermod -a -G sudo <USER>= to add =<USER>= to /sudo/ group. Or manually by updating the /user's previlege specification/ in =/etc/sudoers=
+We create a new user using =useradd <USER>= instead of =/usr/sbin/adduser=. Also we need to add =<USER>= to sudoers. Either using =usermod -aG sudo <USER>= to add =<USER>= to /sudo/ group. Or manually by updating the /user's previlege specification/ in =/etc/sudoers=
 
 #+BEGIN_SRC conf
 # User privilege specification
 <USER>    ALL=(ALL:ALL) NOPASSWD:ALL
 #+END_SRC
+
+we can check that using =groups <USER>=.
 
 *** DONE Configure a static IP
 
