@@ -19,24 +19,24 @@ Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/deb
 
 - State "IN-PROGRESS"                  [2019-08-01 Thu 14:23]
 
-** DONE Initial Configuration
+** IN-PROGRESS Initial Configuration
 
+- State "IN-PROGRESS" from "DONE"       [2019-09-16 Mon 17:28]
 - State "DONE"       from "IN-PROGRESS" [2019-08-09 Fri 10:23]
 - State "IN-PROGRESS" from "TODO"       [2019-08-08 Thu 21:57]
 
-Update the system using =apt-get update -y && apt-get upgrade -y= to ensure that the latest version is available. Install essential tools using
+The netinstall version install frsh updates by default, but we can update the system using =apt-get update -y && apt-get upgrade -y= to ensure that the latest version is available. Install essential tools using.
 
 #+BEGIN_SRC shell
-apt-get install -y sudo vim git apache2 portsentry \
-                    iptables-presistent fail2ban \
-                    mailutils dnsutils net-tools
+apt-get install -y sudo vim git gpg2 \
+                    fail2ban portsentry \
+                    apache2 mailutils \
+                    dnsutils net-tools
 #+END_SRC
 
 *** DONE User configuration
 
 - State "DONE"       from "TODO"       [2019-08-08 Thu 21:46]
-
-+We can create a new non-root user using =/usr/sbin/adduser -m <USER>=[fn:7]. The flag =-d <PATH>= is used to set a specific user path.+
 
 We create a new user using =useradd <USER>= instead of =/usr/sbin/adduser=. Also we need to add =<USER>= to sudoers. Either using =usermod -a -G sudo <USER>= to add =<USER>= to /sudo/ group. Or manually by updating the /user's previlege specification/ in =/etc/sudoers=
 
@@ -47,32 +47,23 @@ We create a new user using =useradd <USER>= instead of =/usr/sbin/adduser=. Also
 
 *** DONE Configure a static IP
 
+- State "DONE"       from "IN-PROGRESS" [2019-09-16 Mon 19:02]
+- State "IN-PROGRESS" from "DONE"       [2019-09-16 Mon 17:28]
 - State "DONE"       from "IN-PROGRESS" [2019-08-09 Fri 10:07]
 - State "IN-PROGRESS" from "TODO"       [2019-08-08 Thu 08:20]
 
 #+BEGIN_QUOTE
-/One things which is required here and could not be done internally, is to change the NAT to Bridge[fn:8]
+/One things which is required here and could not be done internally, is to change the NAT to Bridge[fn:8] so taht we can use the local network IP system.
 #+END_QUOTE
 
-The first place check is the primary network. we need to setup the networking interface. This is done by editing =/etc/network/interfaces=. The primary network on my VM shows
+we need to get the machine's IP and gateway addresses using
 
-#+BEGIN_SRC conf
-#The primary network interface
-allow-hotplug enp0s3
-iface enp0s3 inet dhcp
+#+BEGIN_SRC shell
+  $ ifconfig enp0s3 | grep 'inet ' | awk '{print $2}'
+  $ traceroute 8.8.8.8 | head -3 | grep 'traceroute' -A 1 | grep -v 'traceroute' | awk '{print $2}'
 #+END_SRC
 
-Remove the two lines under the comment, And replace them with =auto enps03= and we need to create a new network interface =/etc/interfaces.d/enp0s3=
-
-#+BEGIN_SRC conf
-# configuration of enp0s3 network interface
-iface enp0s3 inet static
-    address 10.11.200.247
-    netmask 200.255.255.252
-    gateway 10.11.254.254
-#+END_SRC
-
-Finally, we restart the network using =service networking restart= and check that using =ip addr= and look for =enp0s3=
+and adding =address= and it's netmask. as well as the =gateway= too, this is done by script: [[stati-ip.sh]].
 
 ** DONE Configure SSH
 
@@ -161,8 +152,9 @@ KILL_ROUTE="/sbin/iptables -I INPUT -s $TAGETS -j DROP"
 KILL_HOSTS_DENY="ALL: $TARGET$ : DENY
 #+END_SRC
 
-** IN-PROGRESS Manage Services and Packages
+** DONE Manage Services and Packages
 
+- State "DONE"       from "IN-PROGRESS" [2019-09-15 Sun 23:03]
 - State "IN-PROGRESS" from "TODO"       [2019-08-09 Fri 11:33]
 
 *** DONE Disabling unwanted services
