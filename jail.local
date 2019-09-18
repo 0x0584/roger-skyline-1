@@ -8,26 +8,8 @@ action = %(action_mwl)s
 
 [sshd]
 enabled = true
-port = 2222
+port = 63845
 filter = sshd
 bantime = 1m
 findtime = 1m
 maxretry = 3
-
-[portscan]
-enabled  = true
-filter   = portscan
-logpath  = /var/log/syslog
-bantime = 1m
-findtime = 1m
-maxretry = 1
-
-[http-get-dos]
-enabled = true
-port = http,https
-filter = http-get-dos
-logpath = /var/log/apache2/access.log
-maxretry = 300
-findtime = 300
-bantime = 600
-action = iptables[name=HTTP, port=http, protocol=tcp]
