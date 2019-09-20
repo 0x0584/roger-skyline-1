@@ -12,6 +12,11 @@ iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT DROP
 
+# limit connections
+
+iptables -A INPUT -p tcp --syn --dport 80 -m connlimit --connlimit-above 15 --connlimit-mask 32 -j REJECT --reject-with tcp-reset  
+iptables -A INPUT -m state --state RELATED,ESTABLISHED -m limit --limit 150/second --limit-burst 160 -j ACCEPT  
+
 # banned ips logs
 
 iptables -A BANNED -m limit --limit 2/min -j LOG --log-prefix "BANNED: " --log-level 4
@@ -54,8 +59,8 @@ iptables -t filter -A OUTPUT -p tcp --dport 25 -j ACCEPT
 iptables -A INPUT -p tcp --dport 63845 -j ACCEPT
 iptables -I INPUT -p tcp --dport 63845 -i enp0s3 \
 		 -m state --state new -m recent --set
-iptables -I INPUT -p tcp --dport 63845 -i enp0s3 -m state --state new \
-		 -m recent --update --seconds 60 --hitcount 20 -j BANNED
+#iptables -I INPUT -p tcp --dport 63845 -i enp0s3 -m state --state new \
+#		 -m recent --update --seconds 60 --hitcount 20 -j BANNED
 
 # allow http/https
 
@@ -63,15 +68,15 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
 iptables -I INPUT -p tcp --dport 80 -i enp0s3 -m state --state new \
 		 -m recent --set
-iptables -I INPUT -p tcp --dport 80 -i enp0s3 -m state --state new \
-		 -m recent --update --seconds 60 --hitcount 20 -j BANNED
+#iptables -I INPUT -p tcp --dport 80 -i enp0s3 -m state --state new \
+#		 -m recent --update --seconds 60 --hitcount 20 -j BANNED
 
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
 iptables -I INPUT -p tcp --dport 443 -i enp0s3 -m state --state new \
 		 -m recent --set
-iptables -I INPUT -p tcp --dport 443 -i enp0s3 -m state --state new \
-		 -m recent --update --seconds 60 --hitcount 20 -j BANNED
+#iptables -I INPUT -p tcp --dport 443 -i enp0s3 -m state --state new \
+#		 -m recent --update --seconds 60 --hitcount 20 -j BANNED
 
 # stop smurf attack
 
