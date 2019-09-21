@@ -6,24 +6,26 @@ This is a guide to do all the things described in Roger Skyline 1. This might no
 
 Here's a link to [[https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.0.0-amd64-netinst.iso][Debian 10.0 Net Install]] for latest packages + minimum download/install time. Also [[https://download.virtualbox.org/virtualbox/6.0.10/VirtualBox-6.0.10-132072-OSX.dmg][VirtualBox 6.0]]. Important thing is to allocate exactly =8 GB= with no partitioning!
 
-* DONE Disk partitioning
+* Disk partitioning
 
-- State "DONE"       from "TODO"       [2019-09-11 Wed 19:31]
+
  Choose manual disk, and create three primary partitions:
 
 + the =/= partition, has 4.5 GB, ext4
 + the =/swap= haS 1GB ext4
 + the =/home= has the rest
 
-* IN-PROGRESS Network and Security
+* Network and Security
 
-- State "IN-PROGRESS"                  [2019-08-01 Thu 14:23]
 
-** IN-PROGRESS Initial Configuration
 
-- State "IN-PROGRESS" from "DONE"       [2019-09-16 Mon 17:28]
-- State "DONE"       from "IN-PROGRESS" [2019-08-09 Fri 10:23]
-- State "IN-PROGRESS" from "TODO"       [2019-08-08 Thu 21:57]
+
+** Initial Configuration
+
+
+
+
+
 
 The netinstall version install frsh updates by default, but we can update the system using =apt-get update -y && apt-get upgrade -y= to ensure that the latest version is available. Install essential tools using.
 
@@ -34,9 +36,9 @@ apt-get install -y sudo vim git gpg2 \
                     dnsutils net-tools
 #+END_SRC
 
-*** DONE User configuration
+*** User configuration
 
-- State "DONE"       from "TODO"       [2019-08-08 Thu 21:46]
+
 
 We create a new user using =useradd <USER>= instead of =/usr/sbin/adduser=. Also we need to add =<USER>= to sudoers. Either using =usermod -aG sudo <USER>= to add =<USER>= to /sudo/ group. Or manually by updating the /user's previlege specification/ in =/etc/sudoers=
 
@@ -47,12 +49,12 @@ We create a new user using =useradd <USER>= instead of =/usr/sbin/adduser=. Also
 
 we can check that using =groups <USER>=.
 
-*** DONE Configure a static IP
+*** Configure a static IP
 
-- State "DONE"       from "IN-PROGRESS" [2019-09-16 Mon 19:02]
-- State "IN-PROGRESS" from "DONE"       [2019-09-16 Mon 17:28]
-- State "DONE"       from "IN-PROGRESS" [2019-08-09 Fri 10:07]
-- State "IN-PROGRESS" from "TODO"       [2019-08-08 Thu 08:20]
+
+
+
+
 
 #+BEGIN_QUOTE
 /One things which is required here and could not be done internally, is to change the NAT to Bridge[fn:8] so taht we can use the local network IP system.
@@ -67,14 +69,14 @@ we need to get the machine's IP and gateway addresses using
 
 and adding =address= and it's netmask. as well as the =gateway= too, this is done by script: [[stati-ip.sh]].
 
-** DONE Configure SSH
+** Configure SSH
 
-- State "DONE"       from "IN-PROGRESS" [2019-08-02 Fri 19:42]
-- State "IN-PROGRESS"                   [2019-08-01 Thu 14:19]
 
-*** DONE Configure default port
 
-- State "DONE"                        [2019-08-02 Fri 19:42]
+
+*** Configure default port
+
+
 
 SSH could be configured by editing the default port (22) in the file =/etc/ssh/sshd_config=, The port should not be chosen arbitrary (or it might be so. but, it *must not be already used* as it would create conflicts). We can check that using =lsof -i -P -n | grep LISTEN | grep <PORT>=.
 
@@ -92,9 +94,9 @@ Though nothing is stopping you from using reserved port numbers, but it's better
 
 I have chosen =63845= as a SSH port, after that we need to modify the port in =/etc/ssh/sshd_config/=. Then, restart sshd daemon
 
-*** DONE Setup access with public keys
+*** Setup access with public keys
 
-- State "DONE"                         [2019-08-02 Fri 19:41]
+
 
 #+BEGIN_QUOTE
 _NOTE:_
@@ -112,14 +114,14 @@ Now, we need to remove root /login permit/, /public key authuntification/ and /p
 
 Finally, restarting SSH daemon service using =service ssh restart=.
 
-** DONE Configure Firewall and Banlist
+** Configure Firewall and Banlist
 
-- State "DONE"       from "IN-PROGRESS" [2019-08-03 Sat 02:11]
-- State "IN-PROGRESS" from "TODO"       [2019-08-02 Fri 19:44]
 
-*** DONE Configuring iptables
 
-- State "DONE"       from "TODO"       [2019-09-11 Wed 23:47]
+
+*** Configuring iptables
+
+
 
 To configure a firewall using iptables, we need to add the [[file:fw][fw]] to =/etc/network/if-pre-up.d/= so that the firewall loads up at every boot.
 
@@ -127,17 +129,17 @@ It contains configuration to block anything but SSH HTTP/HTTPS. Rejecting Smurf 
 
 Also, we need to allow DNS queries for things like =ping= and =apt-get=
 
-*** DONE Configuring fail2ban
+*** Configuring fail2ban
 
-- State "DONE"       from "TODO"       [2019-08-09 Fri 11:06]
+
 We need to protect the server against DOS -- /Denail Of Service/ with fail2ban, +which is done by editing /etc/fail2ban/jail.conf+ we need to edit =jail.local=. A basic settings is in the file [[file:jail.local][jail.local]]
 
 Finally, restaring the service using =service fail2ban restart=
 
-** DONE Configure ports
+** Configure ports
 
-- State "DONE"       from "IN-PROGRESS" [2019-09-12 Thu 15:22]
-- State "IN-PROGRESS" from "TODO"       [2019-08-09 Fri 11:11]
+
+
 
 First thing to do, is ot switch into /auto/ mode for TCP and UDP. By editing the file =/etc/default/portsentry= as follows:
 
@@ -154,14 +156,14 @@ KILL_ROUTE="/sbin/iptables -I INPUT -s $TAGETS -j DROP"
 KILL_HOSTS_DENY="ALL: $TARGET$ : DENY
 #+END_SRC
 
-** DONE Manage Services and Packages
+** Manage Services and Packages
 
-- State "DONE"       from "IN-PROGRESS" [2019-09-15 Sun 23:03]
-- State "IN-PROGRESS" from "TODO"       [2019-08-09 Fri 11:33]
 
-*** DONE Disabling unwanted services
 
-- State "DONE"       from "TODO"       [2019-08-09 Fri 11:52]
+
+*** Disabling unwanted services
+
+
 Services that we don't need are apt-dialy and apt-upgrade and keyboard/console setup nor the syslog
 
 #+BEGIN_SRC bash
@@ -172,9 +174,9 @@ systemctl disable apt-daily-upgrade.timer
 systemctl disable syslog.service
 #+END_SRC
 
-*** DONE Scheduling an update
+*** Scheduling an update
 
-- State "DONE"       from "TODO"       [2019-08-09 Fri 11:52]
+
 Next, create a the repo =/var/scripts= and write in the file =update.sh=. Then, we need to add the task to cron by executing =crontab -e= (as root)
 
 #+BEGIN_SRC shell
@@ -182,21 +184,39 @@ Next, create a the repo =/var/scripts= and write in the file =update.sh=. Then, 
 0 4 * * 6 /var/scirpts/update.sh  # WTF IS THIS SYNTAX
 #+END_SRC
 
-*** DONE Monitor crontab file
+*** Monitor crontab file
 
-- State "DONE"       from "IN-PROGRESS" [2019-09-13 Fri 01:44]
-- State "IN-PROGRESS" from "TODO"       [2019-09-13 Fri 01:43]
+
+
 # idea is to create a md5 somewhere, and keep comparing it each time. Then if we find something bad, we send and email.
 
 create a template mail file =/var/mail/change= and add =watch.sh= to =/var/scripts/=. Also we need to create a checksum of crontab and save it at =/var/log/shasum/=
 
 * PENDING Web Deployment
 
-- State "PENDING"                     [2019-08-01 Thu 14:23]
+
 
 ** Deploying a webpage
 
+
+
+
+#+begin_quote
+The deployment is the process that goes between the production server and the developers.
+#+end_quote
+
+In the development environment, a =post-commit= git hook is all we need to push commits as soon as they're commited. the remote should be thourgh ssh such as =ssh://10.11.16.6:63845/var/www/html/site=.
+
+On the server we would need to schedule a pull from the repo. something like this: =cd /var/www/html/site && git pull= and add it to crontab -e
+
+#+BEGIN_SRC shell
+0 4 * * * cd /var/www/html/site && git pull
+#+END_SRC
+
 ** SSL Certificates
+
+
+we generate ssl certificate using gencert.sh and add =include snippets/self-signed.conf= and =snippets/self-params.conf= to =/etc/nginx/sites-available/site.com=, but only for port =443= (https). we need to add =server_name 10.11.16.6= (our domain)
 
 * Footnotes
 
