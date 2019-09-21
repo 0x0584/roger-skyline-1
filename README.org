@@ -198,21 +198,19 @@ create a template mail file =/var/mail/change= and add =watch.sh= to =/var/scrip
 
 ** Deploying a webpage
 
+# #+begin_quote
+# The deployment is the process that goes between the production server and the developers.
+# #+end_quote
 
+# In the development environment, a =post-commit= git hook is all we need to push commits as soon as they're commited. the remote should be thourgh ssh such as =ssh://10.11.16.6:63845/var/www/html/site=.
 
+# On the server we would need to schedule a pull from the repo. something like this: =cd /var/www/html/site && git pull= and add it to crontab -e
 
-#+begin_quote
-The deployment is the process that goes between the production server and the developers.
-#+end_quote
+# #+BEGIN_SRC shell
+# 0 4 * * * cd /var/www/html/site && git pull
+# #+END_SRC
 
-In the development environment, a =post-commit= git hook is all we need to push commits as soon as they're commited. the remote should be thourgh ssh such as =ssh://10.11.16.6:63845/var/www/html/site=.
-
-On the server we would need to schedule a pull from the repo. something like this: =cd /var/www/html/site && git pull= and add it to crontab -e
-
-#+BEGIN_SRC shell
-0 4 * * * cd /var/www/html/site && git pull
-#+END_SRC
-
+deploy using =deploy.sh=
 ** SSL Certificates
 
 
