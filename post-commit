@@ -1,0 +1,3 @@
+#!/bin/sh
+# this should be in .git/hooks
+git push origin master
